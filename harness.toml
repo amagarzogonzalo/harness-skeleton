@@ -1,0 +1,51 @@
+# The control file. Everything model-related is resolved from here, so switching
+# models is one command and never a hunt through agent definitions.
+#
+#   make profile P=frontier     # apply a profile to opencode.json
+#   make context                # what your always-on context actually costs
+#   make check                  # the gate
+
+[profile]
+active = "balanced"
+
+# Agents ask for a CAPABILITY, never a model name. Profiles bind capability ->
+# concrete OpenRouter model id. Add an agent, pick a capability, done.
+[roles]
+plan    = "reasoning"   # architecture, tradeoffs, reading a large diff
+build   = "coding"      # the default working agent
+review  = "reasoning"   # adversarial review; deliberately a different model than build
+scribe  = "cheap"       # docstrings, changelogs, renames
+judge   = "reasoning"   # eval rubric scoring (optional evals module)
+small   = "cheap"       # titles, summaries, opencode's own housekeeping
+
+# Applied to every OpenRouter request. See https://openrouter.ai/docs/features/provider-routing
+[routing]
+sort              = "throughput"  # "price" | "throughput" | "latency"
+allow_fallbacks   = true
+require_parameters = true   # only route to providers that honor the params you send.
+                            # Without this a provider silently ignores tool_choice or
+                            # reasoning effort and you debug the model for a day.
+data_collection   = "deny"  # exclude providers that train on your traffic
+zdr               = false   # true = zero-data-retention providers only (smaller pool)
+ignore            = []      # providers you never want
+transforms        = []      # EMPTY ON PURPOSE. OpenRouter's "middle-out" transform
+                            # silently deletes the middle of an over-long prompt.
+                            # Fail loudly instead and fix the context.
+
+[context]
+# Context you pay for on every single request. Enforced by bin/context_budget.py.
+agents_md_max_lines      = 100
+always_on_token_budget   = 6000   # AGENTS.md + rules/ + skill index + MCP tool schemas
+mcp_tool_budget          = 40     # every tool schema is prompt weight on every turn
+skill_description_max    = 400    # chars; skill bodies are free, descriptions are not
+
+[compression]
+# Optional local proxy that compresses tool output, logs and file dumps before
+# they reach the model. See .opencode/rules/context.md before enabling.
+enabled = false
+port    = 8787
+
+[evals]
+# Pinned on purpose: the judge must NOT follow the active profile. If the judge
+# changes when you switch models, every historical score silently re-bases.
+judge_model = "anthropic/claude-sonnet-4.5"

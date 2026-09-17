@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+# Harness tooling manifest. This lets `make context`, `make evals`, `make profiles`
+# and `make check` run inside THIS skeleton repo. When you drop the harness into a
+# real project, merge these dependencies into that project's own pyproject.toml
+# (or just rely on it providing them) rather than shipping two manifests.
+
+[project]
+name = "harness-skeleton"
+version = "0.1.0"
+description = "Provider-agnostic opencode agent harness: profiles, context budget, permissions, optional eval suite."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+    "openai>=1.40",
+    "tiktoken>=0.7",        # used by context_budget.py; falls back to char/3.7 if absent
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,8 @@
+# Offline / air-gapped. Point baseURL at your own server; see rules/models.md.
+name = "local"
+description = "Local weights. No data leaves the machine."
+
+[models]
+reasoning = "qwen/qwen3-coder"
+coding    = "qwen/qwen3-coder"
+cheap     = "qwen/qwen3-coder"

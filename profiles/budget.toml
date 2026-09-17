@@ -1,0 +1,9 @@
+# Bulk mechanical work: renames, test scaffolding, doc passes.
+# Do not run an unattended refactor on this profile.
+name = "budget"
+description = "Cheapest that still completes tool-calling loops reliably."
+
+[models]
+reasoning = "deepseek/deepseek-v4-pro"
+coding    = "deepseek/deepseek-flash"
+cheap     = "google/gemini-2.5-flash-lite"

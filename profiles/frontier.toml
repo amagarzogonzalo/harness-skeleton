@@ -1,0 +1,9 @@
+# When correctness matters more than the bill: migrations, security work,
+# anything you'd otherwise do by hand.
+name = "frontier"
+description = "Best available. Expect 5-10x balanced cost."
+
+[models]
+reasoning = "anthropic/claude-opus-4.1"
+coding    = "anthropic/claude-sonnet-4.5"
+cheap     = "anthropic/claude-haiku-4.5"

@@ -1,0 +1,8 @@
+# Default. A strong coding model for the loop, a cheap one for housekeeping.
+name = "balanced"
+description = "Good results at sane cost. Start here."
+
+[models]
+reasoning = "anthropic/claude-sonnet-4.5"
+coding    = "anthropic/claude-sonnet-4.5"
+cheap     = "google/gemini-2.5-flash"
