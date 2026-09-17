@@ -12,6 +12,7 @@ turns-per-session alongside spend.
 Storage layout differs across opencode versions; if nothing is found, pass
 --path with your session directory (see `opencode --help` for its data dir).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -49,7 +50,8 @@ def main() -> int:
 
     cutoff = time.time() - args.days * 86400
     by_model: dict[str, dict[str, float]] = defaultdict(
-        lambda: {"in": 0, "out": 0, "cost": 0.0, "turns": 0, "sessions": 0})
+        lambda: {"in": 0, "out": 0, "cost": 0.0, "turns": 0, "sessions": 0}
+    )
     sessions_seen: dict[str, set] = defaultdict(set)
 
     for f in root.rglob("*.json"):
@@ -59,7 +61,7 @@ def main() -> int:
             data = json.loads(f.read_text())
         except (OSError, json.JSONDecodeError):
             continue
-        for rec in (data if isinstance(data, list) else [data]):
+        for rec in data if isinstance(data, list) else [data]:
             if not isinstance(rec, dict):
                 continue
             tok = rec.get("tokens") or rec.get("usage")
@@ -76,17 +78,23 @@ def main() -> int:
 
     if not by_model:
         print(f"no usage records under {root} in the last {args.days} days.")
-        print("opencode's storage format varies by version; if you know you have "
-              "sessions, the parser above needs the field names from your files.")
+        print(
+            "opencode's storage format varies by version; if you know you have "
+            "sessions, the parser above needs the field names from your files."
+        )
         return 0
 
     w = max(len(m) for m in by_model)
-    print(f"{'model'.ljust(w)}  {'in':>10} {'out':>10} {'turns':>6} {'sess':>5} "
-          f"{'turns/sess':>10} {'cost':>9}")
+    print(
+        f"{'model'.ljust(w)}  {'in':>10} {'out':>10} {'turns':>6} {'sess':>5} "
+        f"{'turns/sess':>10} {'cost':>9}"
+    )
     for model, m in sorted(by_model.items(), key=lambda kv: -kv[1]["cost"]):
         n = len(sessions_seen[model]) or 1
-        print(f"{model.ljust(w)}  {int(m['in']):>10} {int(m['out']):>10} "
-              f"{int(m['turns']):>6} {n:>5} {m['turns'] / n:>10.1f} ${m['cost']:>8.2f}")
+        print(
+            f"{model.ljust(w)}  {int(m['in']):>10} {int(m['out']):>10} "
+            f"{int(m['turns']):>6} {n:>5} {m['turns'] / n:>10.1f} ${m['cost']:>8.2f}"
+        )
     print("\nHigh turns/session on a cheap model usually means it is not cheap.")
     return 0
 

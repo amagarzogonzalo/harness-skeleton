@@ -21,8 +21,9 @@ make context                        # what your always-on prompt costs
 make evals                          # green out of the box via evals/_demo.py
 ```
 
-Then: fill in `AGENTS.md` (`make agents` fails until the placeholders are gone),
-and **check the model IDs in `profiles/*.toml`** — they're starting points, and
+Then: fill in `AGENTS.md` (it ships with generic defaults so `make agents` passes
+out of the box — replace the layout/commands/rules with your project's), and
+**check the model IDs in `profiles/*.toml`** — they're starting points, and
 `make profile` will reject any that no longer exist and suggest replacements.
 
 ## Switching models

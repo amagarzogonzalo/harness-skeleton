@@ -10,14 +10,16 @@ produces numbers):
   * A calibration set of known-good / known-bad artifacts. Fail it and the
     judge's verdicts this run are discarded rather than trusted.
 """
+
 from __future__ import annotations
 
 import json
 import re
 import statistics
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 SYSTEM = """You are a strict evaluator. You score a document against a rubric.
 
@@ -47,33 +49,38 @@ class JudgeResult:
         if not self.scores:
             return False, "judge produced no parseable scores"
         if self.spread > max_spread:
-            return False, (f"judge disagrees with itself (spread {self.spread}); the rubric "
-                           "is ambiguous — fix the rubric, do not raise the threshold")
+            return False, (
+                f"judge disagrees with itself (spread {self.spread}); the rubric "
+                "is ambiguous — fix the rubric, do not raise the threshold"
+            )
         if self.median < threshold:
             return False, f"median {self.median} < threshold {threshold}"
         return True, f"median {self.median} (spread {self.spread})"
 
 
 def _parse(text: str) -> dict[str, Any] | None:
-    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", text, re.S)
+        m = re.search(r"\{.*\}", text, re.DOTALL)
         try:
             return json.loads(m.group(0)) if m else None
         except json.JSONDecodeError:
             return None
 
 
-def score(artifact: str, rubric: str, call: Callable[..., dict[str, Any]],
-          model: str, samples: int = 3) -> JudgeResult:
+def score(
+    artifact: str, rubric: str, call: Callable[..., dict[str, Any]], model: str, samples: int = 3
+) -> JudgeResult:
     res = JudgeResult()
     for i in range(samples):
         resp = call(
             model=model,
-            messages=[{"role": "system", "content": SYSTEM},
-                      {"role": "user", "content": f"# RUBRIC\n{rubric}\n\n# DOCUMENT\n{artifact}"}],
+            messages=[
+                {"role": "system", "content": SYSTEM},
+                {"role": "user", "content": f"# RUBRIC\n{rubric}\n\n# DOCUMENT\n{artifact}"},
+            ],
             temperature=0.0,
             response_format={"type": "json_object"},
             seed=1000 + i,
@@ -85,8 +92,13 @@ def score(artifact: str, rubric: str, call: Callable[..., dict[str, Any]],
     return res
 
 
-def calibrate(calibration_dir: Path, rubric: str, call: Callable[..., dict[str, Any]],
-              model: str, tolerance: float = 2.0) -> list[str]:
+def calibrate(
+    calibration_dir: Path,
+    rubric: str,
+    call: Callable[..., dict[str, Any]],
+    model: str,
+    tolerance: float = 2.0,
+) -> list[str]:
     """Files named `<name>.expect<N>.md`. Run BEFORE trusting any verdict."""
     failures = []
     for path in sorted(calibration_dir.glob("*.expect*.md")):

@@ -5,18 +5,23 @@
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t22
 
-install:            ## install deps
-	uv sync --all-extras
+install:            ## install deps into .venv
+	uv sync --no-install-project --all-extras
 
 # ---- the gate -------------------------------------------------------------
-test:               ## unit tests, no network
-	uv run pytest tests/ -q
+# `--no-install-project`: the harness is tooling, not a package. This installs the
+# dependencies (openai, pyyaml, tiktoken) and dev extras (ruff, mypy, pytest)
+# without trying to build the skeleton as a wheel.
+# test/types guard on directory existence so this template is green out of the
+# box, and the same targets work once a real project supplies src/ and tests/.
+test:               ## unit tests, no network (skips if no tests/)
+	@if [ -d tests ]; then uv run pytest tests/ -q; else echo "no tests/ — skipping"; fi
 
 lint:               ## formatting + style
 	uv run ruff check . && uv run ruff format --check .
 
-types:              ## static types
-	uv run mypy src/
+types:              ## static types (skips if no src/)
+	@if [ -d src ]; then uv run mypy src/; else echo "no src/ — skipping"; fi
 
 agents:             ## structural checks on AGENTS.md
 	uv run python bin/lint_agents.py

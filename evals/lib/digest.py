@@ -4,6 +4,7 @@ Diffing raw LLM prose does not work: output varies every run, the diff is always
 red, you stop reading it. Diff a structural projection instead — the things that
 must stay stable, with the thing allowed to vary (wording) removed.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -11,9 +12,9 @@ import json
 import re
 from typing import Any
 
-_FM = re.compile(r"\A---\n(.*?)\n---\n", re.S)
-_HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.M)
-_FENCE = re.compile(r"^```([A-Za-z0-9_+-]*)", re.M)
+_FM = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+_HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+_FENCE = re.compile(r"^```([A-Za-z0-9_+-]*)", re.MULTILINE)
 _LINK = re.compile(r"\[[^\]]*\]\((https?://[^)\s]+)\)")
 _FOOTNOTE = re.compile(r"\[\^([A-Za-z0-9_.:-]+)\]")
 _INLINE_CITE = re.compile(r"\((?:src|source|cite):([A-Za-z0-9_.:-]+)\)")
@@ -33,16 +34,26 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
             continue
         key, _, raw = line.partition(":")
         raw = raw.strip()
-        kind = ("list" if raw.startswith("[") else "empty" if not raw
-                else "number" if _NUM.fullmatch(raw)
-                else "bool" if raw.lower() in {"true", "false"} else "str")
+        kind = (
+            "list"
+            if raw.startswith("[")
+            else "empty"
+            if not raw
+            else "number"
+            if _NUM.fullmatch(raw)
+            else "bool"
+            if raw.lower() in {"true", "false"}
+            else "str"
+        )
         out[key.strip()] = kind
     return out
 
 
 def heading_tree(text: str) -> list[str]:
-    return [f"{len(h)}:{re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')}"
-            for h, t in _HEADING.findall(text)]
+    return [
+        f"{len(h)}:{re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')}"
+        for h, t in _HEADING.findall(text)
+    ]
 
 
 def citations(text: str, sources: Any = None) -> list[str]:
@@ -74,8 +85,8 @@ def digest(artifact: str, sources: Any = None) -> dict[str, Any]:
         "counts": {
             "paragraphs": len(paragraphs),
             "words_bucket": _bucket(len(body.split())),
-            "list_items": len(re.findall(r"^\s*[-*+]\s+", body, re.M)),
-            "tables": len(re.findall(r"^\|.+\|$", body, re.M)),
+            "list_items": len(re.findall(r"^\s*[-*+]\s+", body, re.MULTILINE)),
+            "tables": len(re.findall(r"^\|.+\|$", body, re.MULTILINE)),
         },
     }
     d["hash"] = hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()[:16]
@@ -88,8 +99,11 @@ def diff(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
     ofm, nfm = old.get("frontmatter", {}), new.get("frontmatter", {})
     out += [f"BREAKING frontmatter key removed: {k}" for k in sorted(set(ofm) - set(nfm))]
     out += [f"frontmatter key added: {k}" for k in sorted(set(nfm) - set(ofm))]
-    out += [f"BREAKING frontmatter type changed: {k}: {ofm[k]} -> {nfm[k]}"
-            for k in sorted(set(ofm) & set(nfm)) if ofm[k] != nfm[k]]
+    out += [
+        f"BREAKING frontmatter type changed: {k}: {ofm[k]} -> {nfm[k]}"
+        for k in sorted(set(ofm) & set(nfm))
+        if ofm[k] != nfm[k]
+    ]
 
     oc, nc = set(old.get("citations", [])), set(new.get("citations", []))
     out += [f"BREAKING citation dropped: {c}" for c in sorted(oc - nc)]

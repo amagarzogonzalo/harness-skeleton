@@ -20,12 +20,12 @@ What counts as always-on:
 What does not: skill BODIES. That is the whole point of progressive disclosure —
 a skill body costs nothing until it triggers.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import re
-import sys
 import tomllib
 from pathlib import Path
 
@@ -37,14 +37,14 @@ def count_tokens(text: str) -> int:
         import tiktoken
 
         return len(tiktoken.get_encoding("cl100k_base").encode(text))
-    except Exception:
+    except Exception:  # noqa: BLE001 -- tiktoken is optional; char/3.7 fallback is intentional
         # ~3.7 chars/token for English prose+markdown. Within ~10% of a real
         # tokenizer, which is enough to catch a doubling.
         return round(len(text) / 3.7)
 
 
 def frontmatter(text: str) -> dict[str, str]:
-    m = re.match(r"\A---\n(.*?)\n---\n", text, re.S)
+    m = re.match(r"\A---\n(.*?)\n---\n", text, re.DOTALL)
     if not m:
         return {}
     out = {}

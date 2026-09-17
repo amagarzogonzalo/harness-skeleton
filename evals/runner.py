@@ -9,6 +9,7 @@
 Exit 0 green, 1 regression. Provider-agnostic: any OpenAI-shaped endpoint.
 This module is OPTIONAL — delete evals/ if your project is not LLM-driven.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -25,10 +26,10 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
 sys.path.insert(0, str(ROOT))
 
-from lib import digest as dg              # noqa: E402
-from lib import invariants as inv         # noqa: E402
-from lib import judge as jd               # noqa: E402
-from lib.cassette import Cassette, CassetteMiss  # noqa: E402
+from lib import digest as dg
+from lib import invariants as inv
+from lib import judge as jd
+from lib.cassette import Cassette, CassetteMiss
 
 try:
     import yaml
@@ -67,9 +68,7 @@ def _client():
 
 def _noop_client(**request):
     """Stand-in used in replay mode, where cassette.chat never reaches the network."""
-    raise RuntimeError(
-        "live judge client used in replay mode — re-record with `make evals-live`"
-    )
+    raise RuntimeError("live judge client used in replay mode — re-record with `make evals-live`")
 
 
 def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
@@ -100,9 +99,17 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         if (mw := budget.get("max_wall_s")) and mode != "replay" and wall > mw:
             run_fail.append(f"latency budget: {wall:.1f}s > {mw}s")
 
-        runs.append({"i": i, "digest": dg.digest(artifact, sources), "usage": usage,
-                     "wall_s": round(wall, 2), "failures": run_fail,
-                     "artifact": artifact, "cassette": cassette})
+        runs.append(
+            {
+                "i": i,
+                "digest": dg.digest(artifact, sources),
+                "usage": usage,
+                "wall_s": round(wall, 2),
+                "failures": run_fail,
+                "artifact": artifact,
+                "cassette": cassette,
+            }
+        )
 
     if not runs:
         return {"id": cid, "ok": False, "failures": failures, "notes": notes}
@@ -145,14 +152,24 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 notes.append(f"[{cid}] JUDGE UNCALIBRATED, verdict discarded: {bad}")
                 jcfg = None
         if jcfg:
-            res = jd.score(runs[0]["artifact"], rubric,
-                           lambda **r: cassette.chat(client, **r), model,
-                           samples=int(jcfg.get("samples", 3)))
+            res = jd.score(
+                runs[0]["artifact"],
+                rubric,
+                lambda **r: cassette.chat(client, **r),
+                model,
+                samples=int(jcfg.get("samples", 3)),
+            )
             ok, msg = res.passes(float(jcfg.get("min_score", 7)))
             (notes if ok else failures).append(f"[{cid}] judge ({model}): {msg}")
 
-    return {"id": cid, "ok": not failures, "failures": failures, "notes": notes,
-            "digest": current, "usage": runs[0]["usage"]}
+    return {
+        "id": cid,
+        "ok": not failures,
+        "failures": failures,
+        "notes": notes,
+        "digest": current,
+        "usage": runs[0]["usage"],
+    }
 
 
 def main() -> int:
@@ -177,7 +194,8 @@ def main() -> int:
         for r in results:
             if "digest" in r:
                 (ROOT / "snapshots" / f"{r['id']}.json").write_text(
-                    json.dumps(r["digest"], indent=2, sort_keys=True) + "\n")
+                    json.dumps(r["digest"], indent=2, sort_keys=True) + "\n"
+                )
         print(f"accepted {len(results)} snapshots — commit them with the change that caused them")
         return 0
 
@@ -186,8 +204,10 @@ def main() -> int:
 
     failed = [r for r in results if not r["ok"]]
     for r in results:
-        print(f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  "
-              f"({r.get('usage', {}).get('total_tokens', 0)} tok)")
+        print(
+            f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  "
+            f"({r.get('usage', {}).get('total_tokens', 0)} tok)"
+        )
         for n in r.get("notes", []):
             print(f"      note: {n}")
         for f in r["failures"]:

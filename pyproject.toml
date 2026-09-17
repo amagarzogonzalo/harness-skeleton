@@ -30,6 +30,12 @@ dev = [
 line-length = 100
 target-version = "py311"
 
+# The harness is tooling, not a distributable package. Ship the tool dirs as a
+# data-only wheel so `uv run`/`uv sync` build succeeds instead of erroring on an
+# empty package (the CI failure this template previously hit).
+[tool.hatch.build.targets.wheel]
+only-include = ["bin", "evals", "profiles", "skills"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

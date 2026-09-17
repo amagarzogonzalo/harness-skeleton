@@ -14,6 +14,7 @@ you what replaced it instead of making you go read a changelog.
 The generated block in opencode.json is owned by this script. Edit the profile,
 not the output.
 """
+
 from __future__ import annotations
 
 import argparse

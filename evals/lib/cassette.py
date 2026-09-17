@@ -7,6 +7,7 @@ an artifact diff is attributable to YOUR change.
 The tradeoff, stated plainly: replayed evals test your code, not the model. That
 is what the nightly live job is for.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -25,8 +26,9 @@ class CassetteMiss(RuntimeError):
 
 
 def _key(request: dict[str, Any]) -> str:
-    norm = {k: request.get(k) for k in
-            ("model", "messages", "tools", "reasoning", "response_format")}
+    norm = {
+        k: request.get(k) for k in ("model", "messages", "tools", "reasoning", "response_format")
+    }
     return hashlib.sha256(
         json.dumps(norm, sort_keys=True, ensure_ascii=False, default=str).encode()
     ).hexdigest()[:24]
@@ -65,11 +67,21 @@ class Cassette:
         self.calls.append({"key": k, "replayed": False, "usage": usage, "wall_s": elapsed})
 
         if self.mode == "record":
-            path.write_text(json.dumps({
-                "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "request": request, "response": response,
-                "usage": usage, "wall_s": round(elapsed, 3),
-            }, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+            path.write_text(
+                json.dumps(
+                    {
+                        "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "request": request,
+                        "response": response,
+                        "usage": usage,
+                        "wall_s": round(elapsed, 3),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
         return response
 
     @property
