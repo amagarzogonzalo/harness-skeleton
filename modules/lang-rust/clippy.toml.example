@@ -1,0 +1,5 @@
+# Copy to clippy.toml. `clippy.toml` is picked up by cargo clippy automatically
+# in the package root; a workspace can place it at the workspace root.
+msrv = "1.75"
+avoid-breaking-exported-api = false
+too-many-arguments-threshold = 7

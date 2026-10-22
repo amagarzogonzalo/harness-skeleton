@@ -1,0 +1,35 @@
+# Copy into .github/workflows/ and merge with the existing harness job.
+# Pin every action to a full commit SHA before production use.
+name: rust-module
+on:
+  pull_request:
+  push: { branches: [main] }
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4              # pin to a full SHA
+        with: { fetch-depth: 0 }
+      - uses: dtolnay/rust-toolchain@stable    # pin to a full SHA
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2           # pin to a full SHA
+      - run: make enable M=lang-rust
+      - run: make check
+
+  audit:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4              # pin to a full SHA
+      - uses: dtolnay/rust-toolchain@stable    # pin to a full SHA
+      - run: cargo install cargo-audit cargo-deny --locked
+      - run: cargo audit
+        continue-on-error: true
+      - run: cargo deny check
+        continue-on-error: true

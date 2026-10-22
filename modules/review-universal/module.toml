@@ -1,0 +1,16 @@
+name = "review-universal"
+description = "Universal reviewers: tests, dependencies, APIs, performance, docs, and release readiness."
+status = "stable"
+stack = []
+role = "review"
+agents = [
+  "test-reviewer",
+  "dependency-reviewer",
+  "api-reviewer",
+  "performance-reviewer",
+  "docs-reviewer",
+  "release-reviewer",
+]
+skills = ["test-review", "api-review", "release-review"]
+hooks = []
+check = ""

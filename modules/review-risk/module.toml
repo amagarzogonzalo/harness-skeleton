@@ -1,0 +1,15 @@
+name = "review-risk"
+description = "Risk reviewers: threat modeling, privacy, observability, migrations, and databases."
+status = "stable"
+stack = []
+role = "review"
+agents = [
+  "threat-modeler",
+  "privacy-reviewer",
+  "observability-reviewer",
+  "migration-reviewer",
+  "database-reviewer",
+]
+skills = ["threat-model", "migration-review"]
+hooks = []
+check = ""

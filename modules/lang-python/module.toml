@@ -1,0 +1,9 @@
+name = "lang-python"
+description = "Python review, pytest guidance, packaging, and an offline bandit check."
+status = "stable"
+stack = ["pyproject.toml", "requirements.txt", "setup.py"]
+role = "review"
+agents = ["python-reviewer"]
+skills = ["python-testing", "python-packaging"]
+hooks = ["no-bare-except.js"]
+check = "check.sh"

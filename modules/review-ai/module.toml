@@ -1,0 +1,9 @@
+name = "review-ai"
+description = "AI/LLM reviewers: prompt injection, eval quality, and agent architecture."
+status = "stable"
+stack = []
+role = "review"
+agents = ["llm-security-reviewer", "eval-reviewer", "agent-architecture-reviewer"]
+skills = ["prompt-injection", "eval-review", "agent-design"]
+hooks = []
+check = ""

@@ -16,9 +16,13 @@ This makes that number visible and gates it like any other budget.
 What counts as always-on:
   AGENTS.md, everything in .opencode/rules/, every file named in
   opencode.json:instructions, the skill INDEX (name + description of each skill,
-  which the model must see to know the skill exists), and MCP tool schemas.
-What does not: skill BODIES. That is the whole point of progressive disclosure —
-a skill body costs nothing until it triggers.
+  which the model must see to know the skill exists), the agent INDEX (the task
+  tool lists subagents by name + description), and MCP tool schemas.
+What does not: skill BODIES, agent prompt bodies, and command templates. That is
+the point of progressive disclosure — a body costs nothing until it triggers.
+Custom tool schemas registered by a plugin are also not counted; the report
+warns when a plugin registers one, because a silent undercount is worse than a
+visible warning.
 """
 
 from __future__ import annotations
@@ -30,6 +34,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+BUILTIN_AGENTS = {"plan", "build", "explore", "general"}
 
 
 def count_tokens(text: str) -> int:
@@ -55,15 +60,44 @@ def frontmatter(text: str) -> dict[str, str]:
     return out
 
 
-def collect() -> tuple[list[tuple[str, int, str]], list[str]]:
+def agent_descriptions(root: Path, conf: dict) -> dict[str, str]:
+    """Merge agent descriptions from markdown files and opencode.json.
+
+    Markdown wins on a conflict: it is the file a reviewer edits when changing
+    the agent, and `opencode.json` descriptions are usually a short duplicate.
+    """
+    from_md: dict[str, str] = {}
+    agent_dir = root / ".opencode" / "agent"
+    if agent_dir.exists():
+        for path in sorted(agent_dir.glob("*.md")):
+            fm = frontmatter(path.read_text(encoding="utf-8"))
+            name = fm.get("name", path.stem)
+            description = fm.get("description", "")
+            if description:
+                from_md[name] = description
+
+    from_json: dict[str, str] = {}
+    for name, entry in conf.get("agent", {}).items():
+        if isinstance(entry, dict) and entry.get("description"):
+            from_json[name] = entry["description"]
+
+    merged: dict[str, str] = {}
+    for name in sorted(set(from_md) | set(from_json)):
+        description = from_md.get(name) or from_json.get(name, "")
+        if description:
+            merged[name] = description
+    return merged
+
+
+def collect(root: Path = ROOT) -> tuple[list[tuple[str, int, str]], list[str]]:
     rows: list[tuple[str, int, str]] = []
     warnings: list[str] = []
-    cfg = tomllib.loads((ROOT / "harness.toml").read_text())
+    cfg = tomllib.loads((root / "harness.toml").read_text(encoding="utf-8"))
     limits = cfg.get("context", {})
 
-    agents = ROOT / "AGENTS.md"
-    if agents.exists():
-        text = agents.read_text()
+    agents_md = root / "AGENTS.md"
+    if agents_md.exists():
+        text = agents_md.read_text(encoding="utf-8")
         n = len(text.splitlines())
         rows.append(("AGENTS.md", count_tokens(text), f"{n} lines"))
         if n > limits.get("agents_md_max_lines", 100):
@@ -74,33 +108,71 @@ def collect() -> tuple[list[tuple[str, int, str]], list[str]]:
     else:
         warnings.append("no AGENTS.md — every tool that reads it gets nothing")
 
-    for r in sorted((ROOT / ".opencode" / "rules").glob("*.md")):
-        rows.append((f"rules/{r.name}", count_tokens(r.read_text()), ""))
+    for rule in sorted((root / ".opencode" / "rules").glob("*.md")):
+        rows.append((f"rules/{rule.name}", count_tokens(rule.read_text(encoding="utf-8")), ""))
 
-    opencode = ROOT / "opencode.json"
-    conf = json.loads(opencode.read_text()) if opencode.exists() else {}
+    opencode = root / "opencode.json"
+    conf = json.loads(opencode.read_text(encoding="utf-8")) if opencode.exists() else {}
 
     for extra in conf.get("instructions", []):
         if any(ch in extra for ch in "*?["):
             continue
-        p = ROOT / extra
-        if p.exists() and p.name != "AGENTS.md":
-            rows.append((f"instructions/{p.name}", count_tokens(p.read_text()), ""))
+        path = root / extra
+        if path.exists() and path.name != "AGENTS.md":
+            rows.append(
+                (f"instructions/{path.name}", count_tokens(path.read_text(encoding="utf-8")), "")
+            )
 
-    index, skills = [], sorted((ROOT / "skills").glob("*/SKILL.md"))
-    over = []
-    for s in skills:
-        fm = frontmatter(s.read_text())
-        name, desc = fm.get("name", s.parent.name), fm.get("description", "")
-        index.append(f"{name}: {desc}")
+    skill_index, skills = [], sorted((root / "skills").glob("*/SKILL.md"))
+    over_skills = []
+    for skill in skills:
+        fm = frontmatter(skill.read_text(encoding="utf-8"))
+        name, desc = fm.get("name", skill.parent.name), fm.get("description", "")
+        skill_index.append(f"{name}: {desc}")
         if len(desc) > limits.get("skill_description_max", 400):
-            over.append(f"{name} ({len(desc)} chars)")
+            over_skills.append(f"{name} ({len(desc)} chars)")
         if not desc:
             warnings.append(f"skill {name!r} has no description — it will never trigger")
-    if index:
-        rows.append(("skill index", count_tokens("\n".join(index)), f"{len(skills)} skills"))
-    if over:
-        warnings.append(f"skill descriptions over budget: {', '.join(over)}")
+    if skill_index:
+        rows.append(("skill index", count_tokens("\n".join(skill_index)), f"{len(skills)} skills"))
+    if over_skills:
+        warnings.append(f"skill descriptions over budget: {', '.join(over_skills)}")
+
+    agent_map = agent_descriptions(root, conf)
+    if agent_map:
+        agent_index = [f"{name}: {desc}" for name, desc in agent_map.items()]
+        rows.append(
+            ("agent index", count_tokens("\n".join(agent_index)), f"{len(agent_map)} agents")
+        )
+        over_agents = [
+            f"{name} ({len(desc)} chars)"
+            for name, desc in agent_map.items()
+            if len(desc) > limits.get("agent_description_max", 300)
+        ]
+        if over_agents:
+            warnings.append(f"agent descriptions over budget: {', '.join(over_agents)}")
+
+    task = conf.get("permission", {}).get("task", {})
+    if isinstance(task, dict):
+        known = set(agent_map) | BUILTIN_AGENTS
+        for name, action in task.items():
+            if name != "*" and action != "deny" and name not in known:
+                warnings.append(
+                    f"permission.task allows {name!r}, but no such agent is defined in "
+                    ".opencode/agent/ or opencode.json:agent"
+                )
+
+    plugin_dir = root / ".opencode" / "plugins"
+    if plugin_dir.exists():
+        for plugin in sorted(plugin_dir.iterdir()):
+            if plugin.suffix not in {".js", ".ts", ".mjs", ".cjs"}:
+                continue
+            if re.search(r"\btool\s*:\s*\{", plugin.read_text(encoding="utf-8", errors="ignore")):
+                warnings.append(
+                    f"plugin {plugin.name} registers custom tools. Their schemas are attached "
+                    "to every request but are NOT counted above — extend this meter or remove "
+                    "the tool."
+                )
 
     mcp = conf.get("mcp", {})
     if mcp:
@@ -116,22 +188,24 @@ def collect() -> tuple[list[tuple[str, int, str]], list[str]]:
     return rows, warnings
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--report", action="store_true", help="never exit non-zero")
-    args = ap.parse_args()
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--report", action="store_true", help="never exit non-zero")
+    parser.add_argument("--root", default=str(ROOT), help="repository root")
+    args = parser.parse_args(argv)
 
-    cfg = tomllib.loads((ROOT / "harness.toml").read_text())
+    root = Path(args.root).resolve()
+    cfg = tomllib.loads((root / "harness.toml").read_text(encoding="utf-8"))
     budget = cfg.get("context", {}).get("always_on_token_budget", 6000)
-    rows, warnings = collect()
-    total = sum(t for _, t, _ in rows)
+    rows, warnings = collect(root)
+    total = sum(tokens for _, tokens, _ in rows)
 
-    width = max((len(n) for n, _, _ in rows), default=10)
+    width = max((len(name) for name, _, _ in rows), default=10)
     print(f"{'source'.ljust(width)}  {'tokens':>7}   {'share':>6}")
     print("-" * (width + 22))
-    for name, tok, note in sorted(rows, key=lambda r: -r[1]):
-        share = f"{tok / total:.0%}" if total else "-"
-        print(f"{name.ljust(width)}  {tok:>7}   {share:>6}  {note}")
+    for name, tokens, note in sorted(rows, key=lambda row: -row[1]):
+        share = f"{tokens / total:.0%}" if total else "-"
+        print(f"{name.ljust(width)}  {tokens:>7}   {share:>6}  {note}")
     print("-" * (width + 22))
     print(f"{'TOTAL'.ljust(width)}  {total:>7}   of {budget} budget")
 
@@ -141,14 +215,14 @@ def main() -> int:
         f"that is {total * 200 / 1_000_000:.1f}M input tokens/day before you ask anything."
     )
 
-    for w in warnings:
-        print(f"\nwarn: {w}")
+    for warning in warnings:
+        print(f"\nwarn: {warning}")
 
     if total > budget:
+        biggest = max(rows, key=lambda row: row[1])[0] if rows else "nothing"
         print(
-            f"\nFAIL: {total} > {budget}. Biggest contributor is "
-            f"{max(rows, key=lambda r: r[1])[0]}. Cut it, or raise the budget in "
-            "harness.toml with a comment saying why."
+            f"\nFAIL: {total} > {budget}. Biggest contributor is {biggest}. Cut it, or "
+            "raise the budget in harness.toml with a comment saying why."
         )
         return 0 if args.report else 1
     print(f"\nOK: {budget - total} tokens of headroom.")

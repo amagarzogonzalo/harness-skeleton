@@ -30,6 +30,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = "https://openrouter.ai/api/v1/models"
 MANAGED = "_generated_by_apply_profile"
+CORE_AGENT_ROLES = {
+    "plan": "plan",
+    "build": "build",
+    "critic": "review",
+    "scribe": "scribe",
+    "security-reviewer": "review",
+}
 
 
 def load_toml(p: Path) -> dict:
@@ -84,14 +91,39 @@ def provider_options(routing: dict) -> dict:
     return opts
 
 
-def build(profile: dict, cfg: dict) -> dict:
+def enabled_module_agents(root: Path) -> dict[str, str]:
+    """Agents copied in by `bin/modules.py enable`, and the capability they ask for.
+
+    The module state file is the source of truth, so disabling a module removes
+    its model entries on the next profile application without hand-editing
+    harness.toml.
+    """
+    state = root / "modules" / ".enabled.json"
+    if not state.exists():
+        return {}
+    data = json.loads(state.read_text(encoding="utf-8"))
+    agents: dict[str, str] = {}
+    for module in data.get("modules", {}).values():
+        role = module.get("role", "review")
+        for agent in module.get("agents", []):
+            agents[agent] = role
+    return agents
+
+
+def build(profile: dict, cfg: dict, module_agents: dict[str, str] | None = None) -> dict:
     roles, routing = cfg["roles"], cfg.get("routing", {})
     models = profile["models"]
+    module_agents = module_agents or {}
     missing = {r: c for r, c in roles.items() if c not in models}
     if missing:
         raise SystemExit(
             f"profile {profile['name']!r} has no model for capabilities: "
             f"{sorted(set(missing.values()))}"
+        )
+    unknown = {name: role for name, role in module_agents.items() if role not in roles}
+    if unknown:
+        raise SystemExit(
+            f"module agents ask for roles missing from harness.toml [roles]: {unknown}"
         )
 
     opts = provider_options(routing)
@@ -100,32 +132,47 @@ def build(profile: dict, cfg: dict) -> dict:
     def m(role: str) -> str:
         return f"openrouter/{models[roles[role]]}"
 
+    agent_entries = {name: {"model": m(role)} for name, role in CORE_AGENT_ROLES.items()}
+    agent_entries.update({name: {"model": m(role)} for name, role in module_agents.items()})
+
     return {
         MANAGED: {
             "profile": profile["name"],
             "roles": {r: models[c] for r, c in roles.items()},
+            "module_agents": sorted(module_agents),
             "note": "Generated. Edit harness.toml or profiles/, then `make profile`.",
         },
         "model": m("build"),
         "small_model": m("small"),
         "provider": {"openrouter": {"models": model_block}},
-        "agent": {
-            "plan": {"model": m("plan")},
-            "build": {"model": m("build")},
-            "critic": {"model": m("review")},
-            "scribe": {"model": m("scribe")},
-        },
+        "agent": agent_entries,
     }
 
 
 def merge(base: dict, generated: dict) -> dict:
     """Preserve everything hand-written; replace only what this script owns."""
     out = dict(base)
+    previous = out.get(MANAGED, {}).get("module_agents", [])
+    current = generated[MANAGED].get("module_agents", [])
     out[MANAGED] = generated[MANAGED]
     out["model"] = generated["model"]
     out["small_model"] = generated["small_model"]
     out.setdefault("provider", {})["openrouter"] = generated["provider"]["openrouter"]
+
     agents = out.setdefault("agent", {})
+    # A disabled module must not leave a stale model entry behind. Keep any
+    # hand-written keys on that agent (permissions, description), drop only the
+    # model this script added.
+    for name in previous:
+        if name in current or name in CORE_AGENT_ROLES:
+            continue
+        entry = agents.get(name)
+        if not isinstance(entry, dict):
+            continue
+        entry.pop("model", None)
+        if not entry:
+            agents.pop(name)
+
     for name, patch in generated["agent"].items():
         agents.setdefault(name, {}).update(patch)
     return out
@@ -159,14 +206,17 @@ def main() -> int:
     problems = validate(profile["models"], None if args.offline else fetch_catalog())
     if problems:
         print(f"profile {name!r} is stale:", file=sys.stderr)
-        for p in problems:
-            print(f"  {p}", file=sys.stderr)
+        for problem in problems:
+            print(f"  {problem}", file=sys.stderr)
         print(f"\nFix profiles/{name}.toml, or pass --offline to write it anyway.", file=sys.stderr)
         return 1
 
     cfg_path = ROOT / "opencode.json"
     base = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
-    cfg_path.write_text(json.dumps(merge(base, build(profile, cfg)), indent=2) + "\n")
+    module_agents = enabled_module_agents(ROOT)
+    cfg_path.write_text(
+        json.dumps(merge(base, build(profile, cfg, module_agents)), indent=2) + "\n"
+    )
 
     hp = ROOT / "harness.toml"
     hp.write_text(re.sub(r'(?m)^(active\s*=\s*)".*"$', rf'\1"{name}"', hp.read_text()))

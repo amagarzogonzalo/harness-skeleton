@@ -1,5 +1,7 @@
 .PHONY: help install test lint types context agents check \
         profile profiles evals evals-live evals-accept sessions \
+        modules enable disable modules-check \
+        install-hooks \
         compress-on compress-off compress-savings compress-help
 
 help:
@@ -29,8 +31,28 @@ agents:             ## structural checks on AGENTS.md
 context:            ## what the always-on prompt costs, enforced
 	uv run python bin/context_budget.py
 
-check: lint types agents context test evals   ## everything. This is the gate.
+check: lint types agents context test evals modules-check   ## everything. This is the gate.
+	uv run python bin/gate_marker.py write
 	@echo green
+
+# ---- modules (opt-in catalog; core is the root) ---------------------------
+modules:            ## list the module catalog and detected stacks
+	uv run python bin/modules.py list
+
+enable:             ## enable a module: make enable M=lang-python
+	@test -n "$(M)" || { echo "usage: make enable M=<module>"; exit 1; }
+	uv run python bin/modules.py enable $(M)
+
+disable:            ## disable a module: make disable M=lang-python
+	@test -n "$(M)" || { echo "usage: make disable M=<module>"; exit 1; }
+	uv run python bin/modules.py disable $(M)
+
+modules-check:      ## run check.sh for every enabled module
+	uv run python bin/check_modules.py
+
+install-hooks:      ## point git at .githooks/ for this clone
+	git config core.hooksPath .githooks
+	@echo "hooks installed: .githooks/pre-commit"
 
 # ---- models ---------------------------------------------------------------
 profiles:           ## list model profiles

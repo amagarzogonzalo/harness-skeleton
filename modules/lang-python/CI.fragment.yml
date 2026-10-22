@@ -1,0 +1,33 @@
+# Copy into .github/workflows/ and merge with the existing harness job.
+# Pin every action to a full commit SHA before using this in production; tags
+# are mutable. The comments show where the pin goes.
+name: python-module
+on:
+  pull_request:
+  push: { branches: [main] }
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4        # pin to a full SHA
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v5       # pin to a full SHA
+      - run: make install
+      - run: make enable M=lang-python
+      - run: make check
+
+  audit:
+    # Network-dependent, scheduled, and never allowed to block a PR build.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4        # pin to a full SHA
+      - uses: astral-sh/setup-uv@v5       # pin to a full SHA
+      - run: make install
+      - run: uv run --with pip-audit pip-audit --skip-editable
+        continue-on-error: true

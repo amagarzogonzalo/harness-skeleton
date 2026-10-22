@@ -38,6 +38,7 @@ agents_md_max_lines      = 100
 always_on_token_budget   = 6000   # AGENTS.md + rules/ + skill index + MCP tool schemas
 mcp_tool_budget          = 40     # every tool schema is prompt weight on every turn
 skill_description_max    = 400    # chars; skill bodies are free, descriptions are not
+agent_description_max    = 300    # chars; the task tool pays for every subagent description
 
 [compression]
 # Optional local proxy that compresses tool output, logs and file dumps before

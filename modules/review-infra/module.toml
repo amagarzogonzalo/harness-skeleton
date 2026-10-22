@@ -1,0 +1,9 @@
+name = "review-infra"
+description = "Infrastructure reviewers: CI workflows, IaC, supply chain, and containers."
+status = "stable"
+stack = []
+role = "review"
+agents = ["ci-reviewer", "infra-reviewer", "supply-chain-reviewer", "container-reviewer"]
+skills = ["ci-security", "iac-review", "supply-chain-review"]
+hooks = []
+check = ""

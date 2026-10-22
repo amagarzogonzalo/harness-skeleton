@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# The gate the agent cannot talk its way past.
+#
+# `make check` writes artifacts/gate.json only after every check passes. This
+# hook re-runs the gate on the exact tree being committed. Keep it fast; if it
+# becomes slow, move the slow parts to CI, do not skip them here.
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+echo "pre-commit: make check"
+if ! make check; then
+  echo ""
+  echo "pre-commit: the gate failed. Commit blocked."
+  echo "Fix the failure; do not use --no-verify."
+  exit 1
+fi

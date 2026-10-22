@@ -1,0 +1,14 @@
+name = "review-web"
+description = "Web reviewers: accessibility, frontend quality, GraphQL, and browser security."
+status = "stable"
+stack = []
+role = "review"
+agents = [
+  "accessibility-reviewer",
+  "frontend-reviewer",
+  "graphql-reviewer",
+  "browser-security-reviewer",
+]
+skills = ["a11y-review", "graphql-review"]
+hooks = []
+check = ""

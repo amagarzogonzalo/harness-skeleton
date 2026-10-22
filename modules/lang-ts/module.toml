@@ -1,0 +1,9 @@
+name = "lang-ts"
+description = "TypeScript/Node review, React guidance, strict types, and an offline lint/typecheck/test gate."
+status = "stable"
+stack = ["package.json", "tsconfig.json"]
+role = "review"
+agents = ["typescript-reviewer", "react-reviewer", "node-security-reviewer"]
+skills = ["typescript-testing", "react-review"]
+hooks = ["no-console.js", "typecheck-on-edit.js"]
+check = "check.sh"

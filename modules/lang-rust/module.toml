@@ -1,0 +1,9 @@
+name = "lang-rust"
+description = "Rust review, unsafe audit, clippy/fmt/test gate, and optional deny/audit."
+status = "stable"
+stack = ["Cargo.toml"]
+role = "review"
+agents = ["rust-reviewer", "rust-unsafe-reviewer"]
+skills = ["rust-testing", "rust-unsafe"]
+hooks = ["no-unwrap.js"]
+check = "check.sh"

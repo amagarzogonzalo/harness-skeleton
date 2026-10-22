@@ -1,0 +1,27 @@
+# Example ruff configuration. Merge into pyproject.toml [tool.ruff] if you
+# already have one; do not keep two sources of truth.
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = [
+  "E", "F", "W",   # pycodestyle / pyflakes
+  "I",             # import order
+  "B",             # bugbear
+  "UP",            # pyupgrade
+  "S",             # bandit rules (subset; bandit still runs separately)
+  "SIM",           # simplify
+  "RUF",           # ruff-specific
+]
+ignore = [
+  "E501",          # line length is handled by the formatter
+  "S101",          # assert is allowed in tests
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"scripts/**" = ["S101"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

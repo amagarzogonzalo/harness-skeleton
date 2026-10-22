@@ -10,7 +10,66 @@
     ".opencode/rules/*.md"
   ],
   "permission": {
-    "edit": "allow",
+    "edit": {
+      "*": "allow",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "**/.envrc": "deny",
+      "**/.env.example": "allow",
+      "**/.env.sample": "allow",
+      "**/.env.template": "allow",
+      "**/.env.dist": "allow",
+      "**/*.pem": "deny",
+      "**/*credentials*": "deny",
+      "**/.ssh/**": "deny",
+      "**/.aws/**": "deny",
+      "**/id_rsa": "deny",
+      "**/id_ed25519": "deny"
+    },
+    "read": {
+      "*": "allow",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "**/.envrc": "deny",
+      "**/.env.example": "allow",
+      "**/.env.sample": "allow",
+      "**/.env.template": "allow",
+      "**/.env.dist": "allow",
+      "**/*.pem": "deny",
+      "**/*credentials*": "deny",
+      "**/.ssh/**": "deny",
+      "**/.aws/**": "deny",
+      "**/id_rsa": "deny",
+      "**/id_ed25519": "deny"
+    },
+    "glob": {
+      "*": "allow",
+      "**/.env*": "deny",
+      "**/.env.example": "allow",
+      "**/.env.sample": "allow",
+      "**/.env.template": "allow",
+      "**/.env.dist": "allow",
+      "**/.ssh/**": "deny",
+      "**/.aws/**": "deny"
+    },
+    "grep": {
+      "*": "allow",
+      "**/.env*": "deny",
+      "**/.env.example": "allow",
+      "**/.env.sample": "allow",
+      "**/.env.template": "allow",
+      "**/.env.dist": "allow",
+      "**/.ssh/**": "deny",
+      "**/.aws/**": "deny"
+    },
+    "task": {
+      "*": "deny",
+      "explore": "allow",
+      "critic": "allow",
+      "scribe": "allow",
+      "security-reviewer": "allow"
+    },
+    "doom_loop": "ask",
     "webfetch": "allow",
     "skill": {
       "*": "allow"
@@ -35,12 +94,19 @@
       "make context": "allow",
       "make evals": "allow",
       "make check": "allow",
+      "make modules": "allow",
+      "make enable *": "ask",
+      "make disable *": "ask",
       "make *": "ask",
       "uv run pytest*": "allow",
       "uv run ruff*": "allow",
       "uv run mypy*": "allow",
       "uv run python bin/context_budget.py*": "allow",
       "uv run python bin/lint_agents.py*": "allow",
+      "uv run python bin/gate_marker.py*": "allow",
+      "uv run python bin/check_modules.py": "allow",
+      "uv run python bin/modules.py list": "allow",
+      "uv run python bin/modules.py *": "ask",
       "uv run python evals/runner.py": "allow",
       "uv run *": "ask",
       "npm test*": "allow",
@@ -58,6 +124,8 @@
       "git stash*": "allow",
       "git blame*": "allow",
       "git commit*": "ask",
+      "git commit -n*": "deny",
+      "git commit*--no-verify*": "deny",
       "git checkout -- *": "ask",
       "git push*": "deny",
       "git reset --hard*": "deny",
@@ -136,7 +204,13 @@
       "mode": "subagent",
       "description": "Mechanical documentation: changelogs, docstrings, README tables. No logic changes.",
       "permission": {
-        "edit": "allow",
+        "edit": {
+          "*": "deny",
+          "**/*.md": "allow",
+          "**/*.mdx": "allow",
+          "**/*.rst": "allow",
+          "**/*.txt": "allow"
+        },
         "bash": {
           "*": "deny",
           "make lint": "allow",
@@ -144,6 +218,9 @@
         }
       },
       "model": "openrouter/google/gemini-2.5-flash"
+    },
+    "security-reviewer": {
+      "model": "openrouter/anthropic/claude-sonnet-4.5"
     }
   },
   "command": {
@@ -175,6 +252,7 @@
       "judge": "anthropic/claude-sonnet-4.5",
       "small": "google/gemini-2.5-flash"
     },
+    "module_agents": [],
     "note": "Generated. Edit harness.toml or profiles/, then `make profile`."
   },
   "model": "openrouter/anthropic/claude-sonnet-4.5",

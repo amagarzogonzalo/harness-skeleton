@@ -1,0 +1,19 @@
+# Copy into .github/workflows/ as a starting point for the module checks.
+# Pin every action to a full commit SHA before production use.
+name: infra-module
+on:
+  pull_request:
+  push: { branches: [main] }
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4          # pin to a full SHA
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v5         # pin to a full SHA
+      - run: make install
+      - run: make enable M=review-infra
+      - run: make check

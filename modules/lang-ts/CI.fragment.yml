@@ -1,0 +1,37 @@
+# Copy into .github/workflows/ and merge with the existing harness job.
+# Pin every action to a full commit SHA before production use.
+name: ts-module
+on:
+  pull_request:
+  push: { branches: [main] }
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4          # pin to a full SHA
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v5         # pin to a full SHA
+      - uses: actions/setup-node@v4         # pin to a full SHA
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: make install
+      - run: make enable M=lang-ts
+      - run: make check
+
+  audit:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4          # pin to a full SHA
+      - uses: actions/setup-node@v4         # pin to a full SHA
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm audit --omit=dev
+        continue-on-error: true

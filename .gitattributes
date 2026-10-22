@@ -4,6 +4,9 @@
 
 # Shell and config files must always be LF, even on Windows.
 *.sh text eol=lf
+.githooks/* text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
 Makefile text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
