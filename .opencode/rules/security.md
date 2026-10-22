@@ -27,5 +27,6 @@ repo you did not write.
 
 ## Unattended runs
 `--auto` approves everything not explicitly denied. Only use it inside a
-container, on a branch, with `git push` denied. The blast radius of a headless
-agent is whatever the process can reach.
+container, on a branch, with push credentials removed (or `git push` denied in
+the container). The blast radius of a headless agent is whatever the process can
+reach.

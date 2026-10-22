@@ -127,7 +127,7 @@
       "git commit -n*": "deny",
       "git commit*--no-verify*": "deny",
       "git checkout -- *": "ask",
-      "git push*": "deny",
+      "git push*": "ask",
       "git reset --hard*": "deny",
       "git clean*": "deny",
       "git remote *": "deny",

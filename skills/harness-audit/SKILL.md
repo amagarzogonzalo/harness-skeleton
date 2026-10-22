@@ -60,7 +60,8 @@ make sessions
 ### 5. Permissions and secrets
 
 Read `opencode.json` and `.opencode/rules/security.md`.
-- `git push`, `rm`, `sudo`, `env`, and secret paths are denied.
+- `git push` is `ask` (explicit human approval); `rm`, `sudo`, `env`, and secret
+  paths are denied.
 - `git commit` is ask; `--no-verify` is denied.
 - `task` allows only read-only subagents; `general` is denied.
 - Secret-bearing paths are denied for `read`, `edit`, `glob`, and `grep`, not

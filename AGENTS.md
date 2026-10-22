@@ -25,7 +25,8 @@ make check       # lint + types + context + test + modules + marker  <- the gate
 ```
 
 ## Hard rules
-1. **Never commit** `.env`, keys, or credentials. **Never `git push`.** Stage and stop.
+1. **Never commit** `.env`, keys, or credentials. **Push only when the human
+   explicitly asks**; otherwise stage and stop.
 2. **Do not "fix" intentional ignores.** `# type: ignore[...]` / `# noqa:` with a
    trailing reason are deliberate. Leave them.
 3. **No new dependency and no new MCP server without asking.** Every MCP tool schema

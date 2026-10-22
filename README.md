@@ -59,13 +59,13 @@ dropped on custom providers in headless mode.
 
 ```
 source              tokens    share
-AGENTS.md              586      25%   48 lines
+AGENTS.md              592      25%   49 lines
 rules/context.md       542      23%
 rules/models.md        534      23%
-rules/security.md      385      16%
-skill index            224      10%   6 skills
+rules/security.md      394      17%
+skill index            224       9%   6 skills
 agent index             81       3%   4 agents
-TOTAL                 2352   of 6000 budget
+TOTAL                 2367   of 6000 budget
 ```
 
 Skill *bodies* and agent prompt bodies aren't counted — that's the point of
@@ -130,6 +130,8 @@ from typing `rm -rf`, not from writing a Python script that calls `os.remove`.
 That's why `python *`, `node *`, `uv run *` and `make *` are `ask` rather than
 `allow`: arbitrary code execution routes around every other rule in the file.
 Specific safe subcommands (`uv run pytest*`, `make test`) are allowed explicitly.
+`git push` is `ask`: the agent can push only after you approve the prompt.
+Unattended runs should remove push credentials rather than rely on the prompt.
 
 Secret-bearing paths (`.env`, `*.pem`, `.ssh/`, `.aws/`, `*credentials*`) are
 denied for `read`, `edit`, `glob`, and `grep`, not only for `bash`. `env-protection`
@@ -138,8 +140,9 @@ is a second layer for `rg KEY .env` and similar. It is still not a sandbox:
 interpreter. The devcontainer is the isolation boundary.
 
 `.devcontainer/` is the isolation boundary. Run anything unattended or `--auto`
-in there, on a branch, with `git push` denied. Note the API key is still readable
-by processes inside the container — use a scoped, low-limit key for agent work.
+in there, on a branch, with push credentials removed (or `git push` denied in the
+container). Note the API key is still readable by processes inside the container
+— use a scoped, low-limit key for agent work.
 
 ## The eval module (optional)
 

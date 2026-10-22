@@ -12,7 +12,8 @@ def config():
 
 def test_gate_bypass_commands_stay_denied():
     permission = config()["permission"]
-    assert permission["bash"]["git push*"] == "deny"
+    # Push is a human-gated action, not a silent allow and not a hard deny.
+    assert permission["bash"]["git push*"] == "ask"
     assert permission["bash"]["git commit*"] == "ask"
     assert permission["bash"]["git commit -n*"] == "deny"
     assert permission["bash"]["git commit*--no-verify*"] == "deny"
