@@ -6,7 +6,7 @@ instruction-following worse — not just pricier. Treat context as a budget.
 ## The four levers, cheapest first
 
 1. **Progressive disclosure.** AGENTS.md is a map. Procedures live in
-   `skills/*/SKILL.md` and cost nothing until triggered; only the skill's
+   `.opencode/skills/*/SKILL.md` and cost nothing until triggered; only the skill's
    name + description are always-on. `make context` shows the split.
 
 2. **Retrieval over stuffing.** A million-token window is a ceiling, not a

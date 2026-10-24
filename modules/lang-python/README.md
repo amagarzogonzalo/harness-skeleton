@@ -44,8 +44,8 @@ them.
 | File | Purpose |
 |---|---|
 | `agent/python-reviewer.md` | Review checklist for a Python diff |
-| `skills/python-testing/SKILL.md` | pytest patterns and stop conditions |
-| `skills/python-packaging/SKILL.md` | pyproject, lockfile, build, versioning |
+| `.opencode/skills/python-testing/SKILL.md` | pytest patterns and stop conditions |
+| `.opencode/skills/python-packaging/SKILL.md` | pyproject, lockfile, build, versioning |
 | `hooks/no-bare-except.js` | Blocks `except:` in Python edits (opt-in) |
 | `check.sh` | Offline bandit |
 | `audit.sh` | Network audit (not in the gate) |

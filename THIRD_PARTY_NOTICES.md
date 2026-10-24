@@ -12,10 +12,10 @@ removed, commands and paths were changed, OWASP references were updated to the
 |---|---|
 | `.opencode/agent/security-reviewer.md` | `prompts/agents/security-reviewer.txt`, `skills/security-review/SKILL.md`, `commands/security.md` |
 | `.opencode/agent/critic.md` (pre-existing) | `prompts/agents/code-reviewer.txt` (review stance only) |
-| `skills/tdd/SKILL.md` | `commands/tdd.md`, `skills/tdd-workflow/SKILL.md`, `prompts/agents/tdd-guide.txt` |
-| `skills/loop/SKILL.md` | `prompts/agents/loop-operator.txt`, `commands/checkpoint.md` |
-| `skills/checkpoint/SKILL.md` | `commands/checkpoint.md` |
-| `skills/harness-audit/SKILL.md` | `commands/harness-audit.md`, `prompts/agents/harness-optimizer.txt` |
+| `.opencode/skills/tdd/SKILL.md` | `commands/tdd.md`, `skills/tdd-workflow/SKILL.md`, `prompts/agents/tdd-guide.txt` |
+| `.opencode/skills/loop/SKILL.md` | `prompts/agents/loop-operator.txt`, `commands/checkpoint.md` |
+| `.opencode/skills/checkpoint/SKILL.md` | `commands/checkpoint.md` |
+| `.opencode/skills/harness-audit/SKILL.md` | `commands/harness-audit.md`, `prompts/agents/harness-optimizer.txt` |
 | `modules/lang-python/agent/python-reviewer.md` | `prompts/agents/python-reviewer.txt` |
 | `modules/lang-rust/agent/rust-reviewer.md` | `prompts/agents/rust-reviewer.txt` |
 | `modules/lang-ts/agent/typescript-reviewer.md` | `prompts/agents/code-reviewer.txt`, `commands/code-review.md` |

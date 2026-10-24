@@ -1,6 +1,8 @@
 ---
 name: ship
-description: Prepare completed work for human review. Trigger when the task is done and `make check` is green.
+description: Prepare completed work for human review: run the gate, read the diff, get critic review, and write a handover. Use `/ship`.
+metadata:
+  opencode/slash: "true"
 ---
 
 # Ship

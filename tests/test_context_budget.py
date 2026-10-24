@@ -25,7 +25,7 @@ def make_root(tmp_path, budget=6000):
     (tmp_path / ".opencode" / "agent" / "foo.md").write_text(
         "---\ndescription: markdown description\nmode: subagent\n---\nbody\n"
     )
-    skill = tmp_path / "skills" / "demo"
+    skill = tmp_path / ".opencode" / "skills" / "demo"
     skill.mkdir(parents=True)
     (skill / "SKILL.md").write_text("---\nname: demo\ndescription: demo skill\n---\nbody\n")
     (tmp_path / "opencode.json").write_text(

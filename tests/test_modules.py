@@ -41,7 +41,7 @@ def test_enable_copies_agents_and_skills_not_hooks(tmp_path):
     assert modules.enable(tmp_path, "demo", force=False, with_hooks=False, dry_run=False) == 0
 
     assert (tmp_path / ".opencode" / "agent" / "demo-reviewer.md").exists()
-    assert (tmp_path / "skills" / "demo-skill" / "SKILL.md").exists()
+    assert (tmp_path / ".opencode" / "skills" / "demo-skill" / "SKILL.md").exists()
     assert not (tmp_path / ".opencode" / "plugins" / "demo-hook.js").exists()
 
     data = state(tmp_path)
@@ -91,13 +91,13 @@ def test_disable_removes_only_unmodified_recorded_files(tmp_path):
 
     edited = tmp_path / ".opencode" / "agent" / "demo-reviewer.md"
     edited.write_text("my edit\n")
-    user_file = tmp_path / "skills" / "demo-skill" / "NOTES.md"
+    user_file = tmp_path / ".opencode" / "skills" / "demo-skill" / "NOTES.md"
     user_file.write_text("mine\n")
 
     assert modules.disable(tmp_path, "demo", dry_run=False) == 0
     assert edited.exists()
     assert user_file.exists()
-    assert not (tmp_path / "skills" / "demo-skill" / "SKILL.md").exists()
+    assert not (tmp_path / ".opencode" / "skills" / "demo-skill" / "SKILL.md").exists()
     assert "demo" not in state(tmp_path)["modules"]
 
 

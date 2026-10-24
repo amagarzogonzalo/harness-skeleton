@@ -188,7 +188,7 @@ def planned_files(root: Path, manifest: dict, with_hooks: bool) -> list[tuple[Pa
             raise SystemExit(f"{manifest['name']}: missing skill directory {src_dir}")
         for src in sorted(p for p in src_dir.rglob("*") if p.is_file()):
             rel = src.relative_to(src_dir)
-            pairs.append((src, root / "skills" / skill / rel))
+            pairs.append((src, root / ".opencode" / "skills" / skill / rel))
 
     if with_hooks:
         for hook in manifest["hooks"]:

@@ -26,7 +26,7 @@ uv run python bin/modules.py enable lang-rust --with-hooks
 | Source | Destination |
 |---|---|
 | `modules/<m>/agent/<name>.md` | `.opencode/agent/<name>.md` |
-| `modules/<m>/skills/<skill>/**` | `skills/<skill>/**` |
+| `modules/<m>/skills/<skill>/**` | `.opencode/skills/<skill>/**` |
 | `modules/<m>/hooks/*.js` (only with `--with-hooks`) | `.opencode/plugins/*.js` |
 | `modules/<m>/check.sh` | run in place by `bin/check_modules.py` |
 | `opencode.json` | `permission.task[<agent>] = "allow"` for each enabled agent |

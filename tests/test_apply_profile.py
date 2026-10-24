@@ -83,3 +83,10 @@ def test_merge_preserves_hand_written_agent_permissions():
     merged = apply_profile.merge(base, generated)
     assert merged["agent"]["critic"]["permission"] == {"edit": "deny"}
     assert merged["agent"]["critic"]["model"] == "openrouter/reason/model"
+
+
+def test_merge_preserves_hand_written_commands():
+    base = {"command": {"loop": {"template": "keep me"}}}
+    generated = apply_profile.build(PROFILE, CFG, {})
+    merged = apply_profile.merge(base, generated)
+    assert merged["command"]["loop"]["template"] == "keep me"

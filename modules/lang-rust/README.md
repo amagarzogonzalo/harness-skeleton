@@ -40,8 +40,8 @@ cargo test --all-features
 |---|---|
 | `agent/rust-reviewer.md` | Ownership, errors, async, API, performance |
 | `agent/rust-unsafe-reviewer.md` | Soundness, aliasing, FFI, unsafe impls |
-| `skills/rust-testing/SKILL.md` | Unit/integration/doc/property/async tests |
-| `skills/rust-unsafe/SKILL.md` | Safety contract and checklist |
+| `.opencode/skills/rust-testing/SKILL.md` | Unit/integration/doc/property/async tests |
+| `.opencode/skills/rust-unsafe/SKILL.md` | Safety contract and checklist |
 | `hooks/no-unwrap.js` | Warning toast for unwrap/expect (opt-in) |
 | `check.sh` | fmt + clippy + test |
 | `audit.sh` | audit/deny/outdated (network) |

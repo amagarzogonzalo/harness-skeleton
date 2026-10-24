@@ -1,6 +1,8 @@
 ---
 name: new-skill
-description: Write a new skill, or decide whether something belongs in AGENTS.md instead. Trigger when a procedure is being repeated or someone proposes adding a section to the briefing file.
+description: Write a new skill, or decide whether the content belongs in AGENTS.md instead. Use when a procedure repeats or someone proposes adding to the briefing file. Use `/new-skill`.
+metadata:
+  opencode/slash: "true"
 ---
 
 # Writing a skill
@@ -17,7 +19,7 @@ When in doubt, skill.
 
 ## Shape
 ```
-skills/<name>/SKILL.md
+.opencode/skills/<name>/SKILL.md
 ---
 name: <kebab-case, matches the directory>
 description: <what it does AND when to trigger it. Under 400 chars — this part

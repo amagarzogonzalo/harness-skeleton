@@ -44,8 +44,8 @@ want the earlier feedback.
 | `agent/typescript-reviewer.md` | Types, async, modules, runtime validation |
 | `agent/react-reviewer.md` | Hooks, effects, state, a11y, server/client |
 | `agent/node-security-reviewer.md` | Injection, SSRF, auth, sessions, secrets |
-| `skills/typescript-testing/SKILL.md` | Runner, async, type tests, mocks |
-| `skills/react-review/SKILL.md` | Hooks, state, rendering, a11y |
+| `.opencode/skills/typescript-testing/SKILL.md` | Runner, async, type tests, mocks |
+| `.opencode/skills/react-review/SKILL.md` | Hooks, state, rendering, a11y |
 | `hooks/no-console.js` | Warning toast for console.log (opt-in) |
 | `hooks/typecheck-on-edit.js` | Debounced tsc after edits (opt-in, slow) |
 | `check.sh` | Lint, typecheck, test |

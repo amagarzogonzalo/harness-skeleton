@@ -1,6 +1,6 @@
 ---
 name: loop
-description: Bounded autonomous iteration for a multi-step task with a checkable stop condition. Trigger when a task needs repeated edit-run-inspect cycles, not for a one-shot change.
+description: Run a bounded try-check-repeat loop until a named check passes. Use for multi-step edit-run-inspect work. Use `/loop GOAL: ... | CHECK: ... | CAP: 5`.
 ---
 
 # Bounded loop

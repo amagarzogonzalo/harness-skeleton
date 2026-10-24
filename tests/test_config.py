@@ -52,3 +52,13 @@ def test_reviewers_are_read_only_in_json():
     agents = config()["agent"]
     for name in ("critic",):
         assert agents[name]["permission"]["edit"] == "deny"
+
+
+def test_loop_command_wires_the_bounded_loop_skill():
+    command = config()["command"]["loop"]
+    template = command["template"]
+    assert command["description"]
+    assert ".opencode/skills/loop/SKILL.md" in template
+    assert "$ARGUMENTS" in template
+    assert "artifacts/loop.md" in template
+    assert "Do not commit or push" in template

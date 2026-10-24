@@ -2,7 +2,7 @@
 //
 // This cannot see the conversation, so it is not a checkpoint: it is a
 // heartbeat that other tooling (or a human) can use to notice a stalled run.
-// The real checkpoint procedure is skills/checkpoint/SKILL.md.
+// The real checkpoint procedure is .opencode/skills/checkpoint/SKILL.md.
 //
 // Optional: copy to .opencode/plugins/ and restart opencode.
 

@@ -1,6 +1,8 @@
 ---
 name: harness-audit
-description: Audit the agent harness itself for context bloat, weak instructions, excessive tools, unsafe permissions, and missing verification. Trigger when the agent ignores instructions, context is near budget, or agents/skills/MCP servers were added.
+description: Audit the agent harness for context bloat, weak instructions, excessive tools, unsafe permissions, and missing verification. Use `/harness-audit`.
+metadata:
+  opencode/slash: "true"
 ---
 
 # Harness audit

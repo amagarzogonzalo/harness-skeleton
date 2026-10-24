@@ -86,6 +86,37 @@ default: `make compress-savings` measures it on your traffic before you commit t
 another moving part. `bin/compress.sh` disables telemetry and user-scope installs
 when you do enable it.
 
+## Trying a loop
+
+A loop is allowed when "done" is a command, not a feeling. The procedure lives in
+`.opencode/skills/loop/SKILL.md`; the `/loop` command is a shortcut that points at it.
+Run it from the **build** agent (the plan agent cannot edit).
+
+```text
+/loop GOAL: make the parser tests pass | CHECK: make test | CAP: 5
+```
+
+- `GOAL` — the observable end state.
+- `CHECK` — the exact command that proves it. If this is missing, the loop stops
+  and asks; it does not guess.
+- `CAP` — maximum attempts. The skill defaults to 10; use 3–5 for a first run.
+
+Every iteration is appended to `artifacts/loop.md` (gitignored), including the
+hypothesis, files changed, result, and next action. The skill's stop matrix ends
+the loop on success, two identical failures, no progress, a missing tool, or a
+change that would touch a hard rule or budget. It ends with a `STATUS` block.
+
+`/check` is the narrower loop: run `make check`, fix the smallest thing, re-run.
+It has no iteration cap or written evidence, so use it for small gate failures.
+
+Without the command, paste the header from `.opencode/skills/loop/SKILL.md` and tell the
+agent to read that file first. Do not use `--auto` outside `.devcontainer/`, and
+do not commit or push from inside a loop.
+
+The other core skills are exposed as `/tdd`, `/checkpoint`, `/new-skill`,
+`/harness-audit`, and `/ship`. Module skills appear after `make enable M=<module>`
+and an opencode restart.
+
 ## Modules (opt-in)
 
 Core is the repository root. Everything else is a module: a folder of agents,
@@ -182,7 +213,7 @@ opencode.json             permissions + agents (hand-written) / models (generate
 .opencode/rules/          models · context · security
 .opencode/agent/          plan (read-only) · critic · scribe · security-reviewer
 .opencode/plugins/        env-protection · commit-guard · compaction · audit
-skills/*/SKILL.md         procedures, loaded on demand
+.opencode/skills/*/SKILL.md  procedures, loaded on demand
 modules/                  opt-in agents/skills/hooks/checks; zero cost until enabled
 hooks/optional/           example hooks, not loaded until copied
 bin/apply_profile.py      profile -> opencode.json, with catalog validation

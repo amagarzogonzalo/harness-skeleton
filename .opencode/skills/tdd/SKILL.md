@@ -1,6 +1,8 @@
 ---
 name: tdd
-description: Test-driven development for a behavior change or bug fix. Trigger when adding logic, fixing a bug, or changing a contract, and the change is testable.
+description: Test-driven development: write a failing test first, make the smallest change to pass it, then refactor. Use when adding logic, fixing a bug, or changing a testable contract. Use `/tdd`.
+metadata:
+  opencode/slash: "true"
 ---
 
 # Test-driven development

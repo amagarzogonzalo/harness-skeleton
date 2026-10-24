@@ -1,6 +1,8 @@
 ---
 name: checkpoint
-description: Write a compact recovery state before compaction, a handoff, or a long pause. Trigger before context compaction, after a milestone, or when a task will continue in a fresh session.
+description: Write a compact recovery state before compaction, a handoff, or a long pause, so a fresh session can continue. Use `/checkpoint`.
+metadata:
+  opencode/slash: "true"
 ---
 
 # Checkpoint

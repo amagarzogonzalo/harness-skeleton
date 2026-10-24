@@ -31,8 +31,20 @@ def all_agents():
 
 
 def all_skills():
-    yield from sorted((ROOT / "skills").glob("*/SKILL.md"))
+    yield from sorted((ROOT / ".opencode" / "skills").glob("*/SKILL.md"))
     yield from module_skills()
+
+
+def test_core_skills_live_where_opencode_discovers_them():
+    found = {path.parent.name for path in (ROOT / ".opencode" / "skills").glob("*/SKILL.md")}
+    expected = {"checkpoint", "harness-audit", "loop", "new-skill", "ship", "tdd"}
+    assert expected <= found, f"missing from .opencode/skills: {sorted(expected - found)}"
+
+
+def test_core_skills_are_exposed_in_the_tui():
+    for name in ("checkpoint", "harness-audit", "new-skill", "ship", "tdd"):
+        text = (ROOT / ".opencode" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+        assert 'opencode/slash: "true"' in text, f"{name}: not exposed as a /command"
 
 
 def test_every_declared_module_file_exists():

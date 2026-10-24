@@ -103,7 +103,7 @@ def collect(root: Path = ROOT) -> tuple[list[tuple[str, int, str]], list[str]]:
         if n > limits.get("agents_md_max_lines", 100):
             warnings.append(
                 f"AGENTS.md is {n} lines (limit {limits['agents_md_max_lines']}). "
-                "Move a procedure into skills/ — skills cost nothing until triggered."
+                "Move a procedure into .opencode/skills/ — skills cost nothing until triggered."
             )
     else:
         warnings.append("no AGENTS.md — every tool that reads it gets nothing")
@@ -123,7 +123,7 @@ def collect(root: Path = ROOT) -> tuple[list[tuple[str, int, str]], list[str]]:
                 (f"instructions/{path.name}", count_tokens(path.read_text(encoding="utf-8")), "")
             )
 
-    skill_index, skills = [], sorted((root / "skills").glob("*/SKILL.md"))
+    skill_index, skills = [], sorted((root / ".opencode" / "skills").glob("*/SKILL.md"))
     over_skills = []
     for skill in skills:
         fm = frontmatter(skill.read_text(encoding="utf-8"))
