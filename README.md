@@ -12,14 +12,20 @@ changing codebase, and six months of drift:
 
 ## Install
 
+The verified from-zero path, including Windows and OpenCode installation, is in
+[`docs/SETUP.md`](docs/SETUP.md). The short version:
+
 ```bash
 cp -r harness/. your-repo/
 cd your-repo
+uv run python bin/bootstrap.py      # checks tools, installs deps, offline checks
 export OPENROUTER_API_KEY=...       # or: opencode /connect
 make profile P=balanced             # validates model IDs, writes opencode.json
 make context                        # what your always-on prompt costs
 make evals                          # green out of the box via evals/_demo.py
 ```
+
+`make setup` runs the bootstrap when `make` is installed.
 
 Then: fill in `AGENTS.md` (it ships with generic defaults so `make agents` passes
 out of the box — replace the layout/commands/rules with your project's), and
@@ -40,6 +46,15 @@ make profile P=frontier    # switches plan, build, critic, scribe, judge at once
 `opencode.json` and preserves everything hand-written. CI fails if the two drift
 apart, so the config can't silently diverge from the profile.
 
+Hand-editing `model` or `provider` in `opencode.json` is temporary: the next
+profile application overwrites it. Change `harness.toml` or `profiles/*.toml`
+instead. `bin/modules.py enable/disable` now re-applies the profile only for
+modules that bring agents; skill-only modules such as `deep-research` leave your
+current model untouched. If you enable a module with agents, the active profile
+is applied so those agents get a model — that is why a module can appear to
+switch you to the profile's model (the default `balanced` profile uses Sonnet
+for reasoning/coding).
+
 Two routing settings are load-bearing and set for you:
 
 - `require_parameters: true` — without it OpenRouter may route to a provider that
@@ -52,6 +67,23 @@ Two routing settings are load-bearing and set for you:
 Use opencode's **built-in** openrouter provider, as this config does, rather than
 a custom `@ai-sdk/openai-compatible` one — model-level options are known to be
 dropped on custom providers in headless mode.
+
+## Full access / auto mode
+
+The safe default keeps prompts. If you explicitly want an unattended session,
+use OpenCode's built-in auto mode:
+
+```bash
+opencode --auto
+```
+
+`make auto` is a shortcut. Auto mode approves requests that would otherwise
+ask; explicit `deny` rules still apply, so `.env`, secret paths, destructive
+shell commands, and force-push remain blocked. It is a per-session mode, not an
+auto-approve hook, and it is never enabled by default. Use it only in a
+container, on a topic branch, with push credentials removed. See
+[`docs/SETUP.md`](docs/SETUP.md#6-full-access--auto-mode) and the
+[OpenCode permissions docs](https://opencode.ai/docs/permissions/).
 
 ## Context efficiency
 

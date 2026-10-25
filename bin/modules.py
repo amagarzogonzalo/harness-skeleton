@@ -376,6 +376,39 @@ def apply_profile(root: Path) -> int:
     return result.returncode
 
 
+def module_has_agents(root: Path, name: str) -> bool:
+    """Return whether a module brings agents that need a model binding.
+
+    Args:
+        root: Repository root.
+        name: Module name.
+
+    Returns:
+        bool: True when the module declares at least one agent.
+    """
+    manifest = load_manifest(root / "modules" / name / "module.toml")
+    return bool(manifest.get("agents"))
+
+
+def refresh_models(root: Path, name: str) -> int:
+    """Re-apply the active profile only when the module contains agents.
+
+    Skill-only modules do not add model entries, so re-applying the profile
+    would just overwrite the user's current model choice.
+
+    Args:
+        root: Repository root.
+        name: Module name.
+
+    Returns:
+        int: Zero on success, or the profile subprocess exit code.
+    """
+    if module_has_agents(root, name):
+        return apply_profile(root)
+    print("models unchanged: skill-only module (run `make profile` to change models)")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=str(ROOT), help="repository root")
@@ -412,12 +445,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "enable":
         code = enable(root, args.name, args.force, args.with_hooks, args.dry_run)
         if code == 0 and not args.dry_run and not args.no_apply:
-            code = apply_profile(root)
+            code = refresh_models(root, args.name)
         return code
 
     code = disable(root, args.name, args.dry_run)
     if code == 0 and not args.dry_run and not args.no_apply:
-        code = apply_profile(root)
+        code = refresh_models(root, args.name)
     return code
 
 

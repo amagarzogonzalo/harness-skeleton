@@ -92,10 +92,10 @@ The module is a pinned vendor snapshot:
 
 ```bash
 uv run python bin/sync_skill.py --module deep-research \
-  --source ../projects/research-orchestration-agents/skills/deep-research --check
+  --source ../projects/platforms/research-orchestration-agents/skills/deep-research --check
 
 uv run python bin/sync_skill.py --module deep-research \
-  --source ../projects/research-orchestration-agents/skills/deep-research
+  --source ../projects/platforms/research-orchestration-agents/skills/deep-research
 ```
 
 `--check` compares without writing. `--force` discards local edits in the

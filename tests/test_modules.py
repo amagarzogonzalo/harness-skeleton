@@ -5,19 +5,20 @@ import json
 import modules
 
 
-def make_module(root):
+def make_module(root, *, agents: bool = True):
     base = root / "modules" / "demo"
     (base / "agent").mkdir(parents=True)
     (base / "skills" / "demo-skill").mkdir(parents=True)
     (base / "hooks").mkdir(parents=True)
+    agent_line = 'agents = ["demo-reviewer"]' if agents else "agents = []"
     (base / "module.toml").write_text(
-        """\
+        f"""\
 name = "demo"
 description = "demo module"
 status = "stable"
 stack = ["marker.txt"]
 role = "review"
-agents = ["demo-reviewer"]
+{agent_line}
 skills = ["demo-skill"]
 hooks = ["demo-hook.js"]
 check = "check.sh"
@@ -145,3 +146,26 @@ def test_list_reports_the_catalog(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "demo" in out
     assert "enabled: none" in out
+
+
+def test_skill_only_module_does_not_touch_models(tmp_path, monkeypatch, capsys):
+    make_module(tmp_path, agents=False)
+    calls = []
+    monkeypatch.setattr(modules, "apply_profile", lambda root: calls.append(root) or 0)
+
+    assert modules.main(["--root", str(tmp_path), "enable", "demo"]) == 0
+    assert calls == []
+    assert "models unchanged" in capsys.readouterr().out
+
+    assert modules.main(["--root", str(tmp_path), "disable", "demo"]) == 0
+    assert calls == []
+    assert "models unchanged" in capsys.readouterr().out
+
+
+def test_agent_module_reapplies_profile(tmp_path, monkeypatch):
+    make_module(tmp_path)
+    calls = []
+    monkeypatch.setattr(modules, "apply_profile", lambda root: calls.append(root) or 0)
+
+    assert modules.main(["--root", str(tmp_path), "enable", "demo"]) == 0
+    assert calls == [tmp_path.resolve()]

@@ -7,7 +7,7 @@ version record, and regenerates `SHA256SUMS`. The offline module check verifies
 those hashes; this script is the only piece that needs the sibling repository.
 
     uv run python bin/sync_skill.py --module deep-research \
-        --source ../projects/research-orchestration-agents/skills/deep-research
+        --source ../projects/platforms/research-orchestration-agents/skills/deep-research
 
 Use `--check` to compare the current vendored copy with the source without
 writing anything. Use `--force` only when you intentionally want to discard
@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODULE = "deep-research"
-DEFAULT_SOURCE = "../projects/research-orchestration-agents/skills/deep-research"
+DEFAULT_SOURCE = "../projects/platforms/research-orchestration-agents/skills/deep-research"
 IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".env", ".env.*", ".git", "node_modules")
 
 

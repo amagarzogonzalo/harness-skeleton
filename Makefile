@@ -1,4 +1,4 @@
-.PHONY: help install test lint types context agents check \
+.PHONY: help install setup auto test lint types context agents check \
         profile profiles evals evals-live evals-accept sessions \
         modules enable disable modules-check skill-sync \
         install-hooks \
@@ -11,6 +11,12 @@ help:
 
 install:            ## install deps into .venv
 	uv sync --no-install-project --all-extras
+
+setup:              ## bootstrap: check tools, install deps, run offline checks
+	uv run python bin/bootstrap.py
+
+auto:               ## launch opencode with auto-approve (explicit denies still apply)
+	opencode --auto
 
 # ---- the gate -------------------------------------------------------------
 # `--no-install-project`: the harness is tooling, not a package. This installs the

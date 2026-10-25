@@ -9,6 +9,10 @@ arbitrary code execution routes around every other rule in the file.
 For real isolation, run the agent in a container: `.devcontainer/` is set up for
 this, or use `docker compose run`. Do that before any unattended or headless run.
 
+`opencode --auto` is an explicit per-session opt-in, not a hook: it approves
+otherwise-asking requests but still enforces explicit denies. Never make it the
+default and never add a hook that approves prompts.
+
 ## Secrets
 `OPENROUTER_API_KEY` lives in the environment, which means every subprocess the
 agent is allowed to spawn can read it. Mitigations, in order of effort:
