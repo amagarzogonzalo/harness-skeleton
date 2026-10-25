@@ -1,0 +1,5 @@
+repo = "https://github.com/amagarzogonzalo/research-orchestration-agents"
+path = "skills/deep-research"
+skill = "deep-research"
+version = "1.0"
+synced_at = "2026-10-25T10:31:21.618333+00:00"

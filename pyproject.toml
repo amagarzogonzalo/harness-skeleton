@@ -29,6 +29,12 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Vendored skills are generated from their canonical repository and linted
+# there; checking them here would impose this repo's line length on the source.
+extend-exclude = [
+    "modules/deep-research/skills",
+    ".opencode/skills/deep-research",
+]
 
 # The harness is tooling, not a distributable package. Ship the tool dirs as a
 # data-only wheel so `uv run`/`uv sync` build succeeds instead of erroring on an

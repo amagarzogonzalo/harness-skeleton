@@ -71,7 +71,14 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         print(f"\n== module: {name} ==")
-        result = subprocess.run([shell, str(script)], cwd=root, check=False)
+        # Git Bash on Windows mangles an absolute Windows path passed as the
+        # script argument; a POSIX path relative to the repository root works
+        # on every platform.
+        result = subprocess.run(
+            [shell, script.relative_to(root).as_posix()],
+            cwd=root,
+            check=False,
+        )
         if result.returncode != 0:
             failed.append(name)
 

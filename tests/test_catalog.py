@@ -31,8 +31,13 @@ def all_agents():
 
 
 def all_skills():
-    yield from sorted((ROOT / ".opencode" / "skills").glob("*/SKILL.md"))
-    yield from module_skills()
+    seen: set[str] = set()
+    for path in sorted((ROOT / ".opencode" / "skills").glob("*/SKILL.md")):
+        seen.add(path.parent.name)
+        yield path
+    for path in module_skills():
+        if path.parent.name not in seen:
+            yield path
 
 
 def test_core_skills_live_where_opencode_discovers_them():

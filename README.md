@@ -142,6 +142,7 @@ enabled, not merely because a `pyproject.toml` or `Cargo.toml` exists.
 | `lang-python` | python reviewer, pytest/packaging skills, bandit check |
 | `lang-rust` | rust and unsafe reviewers, testing skills, fmt/clippy/test |
 | `lang-ts` | TypeScript/React/Node reviewers, testing skills, lint/tsc/test |
+| `deep-research` | cited literature/landscape research via the Knowledge Engine service |
 
 Four plugins are active in `.opencode/plugins/`: `env-protection` (secret paths
 through `read`/`write`/`edit`/`rg`), `commit-guard` (refuses a commit without a

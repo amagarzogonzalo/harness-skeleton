@@ -1,0 +1,9 @@
+name = "deep-research"
+description = "Cited literature and landscape research through the Knowledge Engine HTTP service."
+status = "stable"
+stack = []
+role = "build"
+agents = []
+skills = ["deep-research"]
+hooks = []
+check = "check.sh"

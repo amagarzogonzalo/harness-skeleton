@@ -1,0 +1,32 @@
+{
+  "modules": {
+    "deep-research": {
+      "agents": [],
+      "files": [
+        {
+          "dst": ".opencode/skills/deep-research/README.md",
+          "sha256": "08a579e4240258b2c500338b2ab47ae09d8e4ffa65faf2826a7ef8f200290b92",
+          "src": "modules/deep-research/skills/deep-research/README.md"
+        },
+        {
+          "dst": ".opencode/skills/deep-research/SKILL.md",
+          "sha256": "2be96d1e0b5b6e6c7cca90a675d71eb5d54dc7a30a742de67344cddb72dfb02e",
+          "src": "modules/deep-research/skills/deep-research/SKILL.md"
+        },
+        {
+          "dst": ".opencode/skills/deep-research/scripts/install.py",
+          "sha256": "71e718f3849e62beb74583503f5c0d6bba05f3a292da7c1d3d2056c06ff3a632",
+          "src": "modules/deep-research/skills/deep-research/scripts/install.py"
+        },
+        {
+          "dst": ".opencode/skills/deep-research/scripts/research.py",
+          "sha256": "e2170e832fa2efaa30590336b669f762c888e0f5736fb942a2ba55b0db185e68",
+          "src": "modules/deep-research/skills/deep-research/scripts/research.py"
+        }
+      ],
+      "name": "deep-research",
+      "role": "build",
+      "task_permissions": {}
+    }
+  }
+}

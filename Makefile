@@ -1,8 +1,10 @@
 .PHONY: help install test lint types context agents check \
         profile profiles evals evals-live evals-accept sessions \
-        modules enable disable modules-check \
+        modules enable disable modules-check skill-sync \
         install-hooks \
         compress-on compress-off compress-savings compress-help
+
+SKILL_SOURCE ?= ../projects/research-orchestration-agents/skills/deep-research
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t22
@@ -49,6 +51,9 @@ disable:            ## disable a module: make disable M=lang-python
 
 modules-check:      ## run check.sh for every enabled module
 	uv run python bin/check_modules.py
+
+skill-sync:         ## refresh the vendored deep-research skill from its canonical repo
+	uv run python bin/sync_skill.py --module deep-research --source $(SKILL_SOURCE)
 
 install-hooks:      ## point git at .githooks/ for this clone
 	git config core.hooksPath .githooks
