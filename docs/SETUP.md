@@ -166,9 +166,11 @@ make full
 ```
 
 The launcher sets `OPENCODE_PERMISSION` for that process only. It never edits
-`opencode.json`, agent files, or models. `auto` is the recommended unattended
-mode: it approves otherwise-asking requests but keeps explicit denies, so
-`.env`, secret paths, `rm *`, and force-push remain blocked. `full` replaces the
+`opencode.json`, agent files, or models. A running session cannot change its
+own mode; use the TUI command palette or relaunch with the command. `auto` is
+the recommended unattended mode: it approves otherwise-asking requests but
+keeps explicit denies, so `.env`, secret paths, `rm *`, and force-push remain
+blocked. `full` replaces the
 top-level permission block with `{"*": "allow"}` and selects `build`; agent
 specific permissions in `opencode.json` still take precedence. It is a
 deliberate escalation, so use it only in a container, on a topic branch, and

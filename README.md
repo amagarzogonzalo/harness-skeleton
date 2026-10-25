@@ -96,7 +96,9 @@ uv run python bin/opencode_mode.py full
 The launcher passes a per-process `OPENCODE_PERMISSION`; it does not edit
 `opencode.json`, agent files, or models. `auto` is the recommended unattended
 mode. `full` is a deliberate escalation; it removes the secret and destructive
-denies, so use it only with push credentials removed. See
+denies, so use it only with push credentials removed. A running agent cannot
+change its own mode; it can only tell you to use the TUI command palette or
+relaunch with `make auto`/`make full`. See
 [`docs/SETUP.md`](docs/SETUP.md#6-modes-safe-auto-full) and the
 [OpenCode permissions docs](https://opencode.ai/docs/permissions/).
 

@@ -24,6 +24,13 @@ make install-hooks  # point git at .githooks/ (per clone)
 make check       # lint + types + context + test + modules + marker  <- the gate
 ```
 
+## Permission modes
+`safe`, `auto`, and `full` are launch-time choices: `make safe|auto|full` or
+`uv run python bin/opencode_mode.py safe|auto|full`. A running agent cannot
+change its own mode; never run `opencode --auto` from a tool call. If the human
+asks for auto/full, tell them to use the TUI command palette or relaunch with
+that command. Never claim you enabled a mode you did not launch.
+
 ## Hard rules
 1. **Never commit** `.env`, keys, or credentials. **Push only when the human
    explicitly asks**; otherwise stage and stop.
