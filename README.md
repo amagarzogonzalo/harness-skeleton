@@ -68,22 +68,57 @@ Use opencode's **built-in** openrouter provider, as this config does, rather tha
 a custom `@ai-sdk/openai-compatible` one — model-level options are known to be
 dropped on custom providers in headless mode.
 
-## Full access / auto mode
+## Modes
 
-The safe default keeps prompts. If you explicitly want an unattended session,
-use OpenCode's built-in auto mode:
+The default is `safe`; setup never changes your model, agents, or permissions
+unless you explicitly run a profile or enable an agent module.
+
+| Mode | Prompts | Deny rules | Agent |
+|---|---|---|---|
+| `safe` | yes | enforced | project default (`plan`) |
+| `auto` | no | enforced | `build` |
+| `full` | no | **replaced by allow** | `build` |
 
 ```bash
-opencode --auto
+make safe     # project permissions, prompts
+make auto     # no prompts; .env, rm, force-push still denied
+make full     # full permissions; use only in a container/topic branch
 ```
 
-`make auto` is a shortcut. Auto mode approves requests that would otherwise
-ask; explicit `deny` rules still apply, so `.env`, secret paths, destructive
-shell commands, and force-push remain blocked. It is a per-session mode, not an
-auto-approve hook, and it is never enabled by default. Use it only in a
-container, on a topic branch, with push credentials removed. See
-[`docs/SETUP.md`](docs/SETUP.md#6-full-access--auto-mode) and the
+Without `make`:
+
+```bash
+uv run python bin/opencode_mode.py safe
+uv run python bin/opencode_mode.py auto
+uv run python bin/opencode_mode.py full
+```
+
+The launcher passes a per-process `OPENCODE_PERMISSION`; it does not edit
+`opencode.json`, agent files, or models. `auto` is the recommended unattended
+mode. `full` is a deliberate escalation; it removes the secret and destructive
+denies, so use it only with push credentials removed. See
+[`docs/SETUP.md`](docs/SETUP.md#6-modes-safe-auto-full) and the
 [OpenCode permissions docs](https://opencode.ai/docs/permissions/).
+
+## Agents
+
+The harness ships five agents:
+
+- `plan` and `build` are **primary**; switch with Tab.
+- `critic`, `scribe`, and `security-reviewer` are **subagents**; invoke them
+  with `@critic`, `@scribe`, or `@security-reviewer`, or let `build` task them.
+
+Verify what OpenCode loaded, from the repository root:
+
+```bash
+opencode agent list
+opencode debug agent plan
+```
+
+If only `build` and `plan` appear, the others are subagents (expected). If none
+of the harness agents appear, run OpenCode from the repository root and confirm
+that both `opencode.json` and `.opencode/agent/` were copied. See
+[`docs/SETUP.md`](docs/SETUP.md#7-agents).
 
 ## Context efficiency
 

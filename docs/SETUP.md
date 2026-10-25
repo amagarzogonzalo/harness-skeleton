@@ -140,34 +140,72 @@ If `make` is available, the full gate is:
 make check
 ```
 
-## 6. Full access / auto mode
+## 6. Modes: safe, auto, full
 
-The safe default keeps prompts in place. If you explicitly want an unattended
-session with no questions, OpenCode has a built-in auto mode:
+The default is `safe`. Setup does **not** change your model, agents, or
+permissions. Choose a mode explicitly at launch:
+
+| Mode | Prompts | Deny rules | Agent |
+|---|---|---|---|
+| `safe` | yes | enforced | project default (`plan`) |
+| `auto` | no | enforced | `build` |
+| `full` | no | **replaced by allow** | `build` |
 
 ```bash
-opencode --auto
+uv run python bin/opencode_mode.py safe
+uv run python bin/opencode_mode.py auto
+uv run python bin/opencode_mode.py full
 ```
 
-In the TUI, the command palette has **Enable auto-approve permissions**. Auto
-mode approves requests that would otherwise ask; explicit `deny` rules are
-still enforced. That means the harness's secret-path, `.env`, destructive-shell,
-and force-push denies remain blocked. This is the official per-session mode, not
-an auto-approve hook, and the harness does not enable it by default.
+or, with `make`:
 
-`make auto` is a shortcut for `opencode --auto`.
+```bash
+make safe
+make auto
+make full
+```
 
-Use auto mode only inside a container, on a topic branch, and with push
-credentials removed or denied. Permissions are a policy boundary, not an
-isolation boundary; a script can still call `os.remove`. See
+The launcher sets `OPENCODE_PERMISSION` for that process only. It never edits
+`opencode.json`, agent files, or models. `auto` is the recommended unattended
+mode: it approves otherwise-asking requests but keeps explicit denies, so
+`.env`, secret paths, `rm *`, and force-push remain blocked. `full` replaces the
+top-level permission block with `{"*": "allow"}` and selects `build`; agent
+specific permissions in `opencode.json` still take precedence. It is a
+deliberate escalation, so use it only in a container, on a topic branch, and
+with push credentials removed.
+
+Permissions are a policy boundary, not an isolation boundary; a script can
+still call `os.remove`. See
 [Permissions](https://opencode.ai/docs/permissions/) and the harness
 [security rules](../.opencode/rules/security.md).
 
-If you want a permanent permissive policy, set `permission: "allow"` in
-`opencode.json`, but that also removes the secret/destructive denies. The
-harness does not do this by default.
+## 7. Agents
 
-## 7. Skills
+The harness ships five agents:
+
+- `plan` and `build` are **primary**; switch with Tab.
+- `critic`, `scribe`, and `security-reviewer` are **subagents**; invoke them
+  with `@critic`, `@scribe`, or `@security-reviewer`, or let `build` task them.
+
+Agent files live in `.opencode/agent/`. The inline definitions are in
+`opencode.json` under `agent`. `default_agent` is `plan` (read-only); switch to
+`build` when you want edits.
+
+Verify what OpenCode loaded, from the repository root:
+
+```bash
+opencode agent list
+opencode debug agent plan
+```
+
+If only `build` and `plan` appear, that is expected: the other three are
+subagents and are not in the Tab switcher. If none of the harness agents appear,
+run OpenCode from the repository root and confirm that both `opencode.json` and
+`.opencode/agent/` were copied. See
+[Agents](https://opencode.ai/docs/agents/) and
+[`opencode agent list`](https://opencode.ai/docs/cli/#agent).
+
+## 8. Skills
 
 OpenCode discovers:
 
@@ -205,6 +243,7 @@ uv run python .opencode/skills/deep-research/scripts/research.py health --json
 |---|---|
 | `opencode: command not found` | Install it with the commands above, or use WSL and install there. |
 | `make: command not found` | Use the `uv run python ...` commands in this guide; `make` is a convenience. |
+| Agents missing | Restart OpenCode; run from the repository root; check `opencode agent list` and that `opencode.json` plus `.opencode/agent/` exist. |
 | Model changed after enabling a module | It was a module with agents; the active profile owns model keys. Change the profile, not `opencode.json`. |
 | `OPENROUTER_API_KEY` missing | Run `opencode` → `/connect`, or export the key. |
 | Profile validation fails | Re-pin the model IDs in `profiles/*.toml`; the catalog changed. |

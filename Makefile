@@ -1,4 +1,4 @@
-.PHONY: help install setup auto test lint types context agents check \
+.PHONY: help install setup safe auto full agents-list test lint types context agents check \
         profile profiles evals evals-live evals-accept sessions \
         modules enable disable modules-check skill-sync \
         install-hooks \
@@ -15,8 +15,17 @@ install:            ## install deps into .venv
 setup:              ## bootstrap: check tools, install deps, run offline checks
 	uv run python bin/bootstrap.py
 
-auto:               ## launch opencode with auto-approve (explicit denies still apply)
-	opencode --auto
+safe:               ## launch opencode with project permissions (prompts)
+	uv run python bin/opencode_mode.py safe
+
+auto:               ## launch opencode with no prompts; explicit denies still apply
+	uv run python bin/opencode_mode.py auto
+
+full:               ## launch opencode with full permissions; dangerous
+	uv run python bin/opencode_mode.py full
+
+agents-list:        ## list the agents OpenCode detects in this project
+	opencode agent list
 
 # ---- the gate -------------------------------------------------------------
 # `--no-install-project`: the harness is tooling, not a package. This installs the

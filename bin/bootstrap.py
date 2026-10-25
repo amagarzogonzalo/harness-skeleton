@@ -80,8 +80,10 @@ def next_steps() -> None:
         "  2. uv run python bin/apply_profile.py balanced\n"
         "     # or, if make is installed: make profile P=balanced\n"
         "  3. uv run python bin/context_budget.py\n"
-        "  4. opencode --auto          # optional: no prompts; explicit deny rules still apply\n"
-        "  5. deep-research (optional): copy modules/deep-research/env.example to .env\n"
+        "  4. uv run python bin/opencode_mode.py safe|auto|full\n"
+        "     # safe = prompts; auto = no prompts, denies kept; full = allow everything\n"
+        "  5. opencode agent list    # verify plan/build/critic/scribe/security-reviewer\n"
+        "  6. deep-research (optional): copy modules/deep-research/env.example to .env\n"
         "     and fill RESEARCH_BASE_URL / RESEARCH_TOKEN, then restart opencode.\n"
     )
 
